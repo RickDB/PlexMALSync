@@ -17,7 +17,6 @@ namespace PlexMALSync
 {
   internal class Program
   {
-    // Step 1: Enter UserName and Password information
     private static ICredentialContext _malCredentials;
     private static string _processedAnimeCacheFile;
     private static bool _processing;
@@ -40,7 +39,7 @@ namespace PlexMALSync
           Password = malPassword
         };
 
-        // Create cache specific
+        // Link cache
         _processedAnimeCacheFile = $"AnimeProcessed_{malUsername}.cache";
         _processing = true;
 
@@ -51,6 +50,7 @@ namespace PlexMALSync
         else
           sections.Add(plexSection);
 
+        // Process Plex sections  
         ProcesPlexSections(plexHost, plexToken, sections);
         while (_processing)
           Thread.Sleep(2500);
@@ -81,7 +81,7 @@ namespace PlexMALSync
             animeTitles.Add(title.Trim());
         }
 
-        // Process them to MyAnimeList
+        // Process them with MyAnimeList
         if (animeTitles.Any())
         {
           var animeProcessedCache = ReadAllProcessed();
