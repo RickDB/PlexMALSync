@@ -20,13 +20,14 @@ namespace PlexMALSync
     private static ICredentialContext _malCredentials;
     private static string _processedAnimeCacheFile;
     private static bool _processing;
+    private static string _malUsername;
 
     private static void Main(string[] args)
     {
       try
       {
         // Assign variables
-        var malUsername = args[0];
+        _malUsername = args[0];
         var malPassword = args[1];
         var plexHost = args[2];
         var plexToken = args[3];
@@ -35,12 +36,12 @@ namespace PlexMALSync
         // Create _MALCredentials cache
         _malCredentials = new CredentialContext
         {
-          UserName = malUsername,
+          UserName = _malUsername,
           Password = malPassword
         };
 
         // Link cache
-        _processedAnimeCacheFile = $"AnimeProcessed_{malUsername}.cache";
+        _processedAnimeCacheFile = $"AnimeProcessed_{_malUsername}.cache";
         _processing = true;
 
         var sections = new List<string>();
@@ -69,7 +70,7 @@ namespace PlexMALSync
         foreach (var section in sections)
         {
           string url = $"http://{server}/library/sections/{section}/all?X-Plex-Token={token}";
-          string filename = $"temp_{section}.xml";
+          string filename = $"PlexLibrary_{_malUsername} [{section}].xml";
 
           var wc = new WebClient();
           wc.DownloadFile(url, filename);
