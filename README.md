@@ -14,12 +14,12 @@ Now we have everything we need to sync Plex with MyAnimeList, by default new ent
 
 ### Command line arguments
 
-```MalPlexSync.exe <MAL_USERNAME> <MAL_PASSWORD> <PLEX_HOST:PORT OR PLEX_IP:PORT> <PLEX_TOKEN> <PLEX_SECTION_ID>```
+```PlexMALSync.exe <MAL_USERNAME> <MAL_PASSWORD> <PLEX_HOST:PORT OR PLEX_IP:PORT> <PLEX_TOKEN> <PLEX_SECTION_ID>```
 
 ### Example
 
-```MalPlexSync.exe John Doe 127.0.0.1:32400 001000100FF 1```
+```PlexMALSync.exe John Doe 127.0.0.1:32400 001000100FF 1```
 
 If you have multiple Plex section IDs can separate them with a comma like so:
 
-```MalPlexSync.exe John Doe 127.0.0.1:32400 001000100FF 1,2,3,4```
+```PlexMALSync.exe John Doe 127.0.0.1:32400 001000100FF 1,2,3,4```
