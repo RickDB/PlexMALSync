@@ -25,6 +25,10 @@ If you have multiple Plex section IDs can separate them with a comma like so:
 ```PlexMALSync.exe John Doe 127.0.0.1:32400 001000100FF 1,2,3,4```
 
 
+### Requirements
+
+[.NET Framework 4.5.2](https://www.microsoft.com/en-us/download/details.aspx?id=42642)
+
 ### Credits
 
 [MyAnimeListSharp](https://github.com/dance2die/MyAnimeListSharp) - Great C# MAL API wrapper
