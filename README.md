@@ -1,6 +1,6 @@
 # Plex to MyAnimeList Sync
 
-If you have manage your Anime library via Plex this will allow you to sync your library to MyAnimeList.net, recommend using Plex with the HAMA agent for best Anime name matches.
+If you manage your Anime with Plex this will allow you to sync your libraries to MyAnimeList.net, recommend using Plex with the [HAMA agent](https://github.com/ZeroQI/Hama.bundle) for best Anime name matches.
 
 ### Step 1 - Retrieve your unique Plex token:
 
@@ -8,9 +8,9 @@ https://support.plex.tv/hc/en-us/articles/204059436-Finding-an-authentication-to
 
 ### Step 2 - Retrieve the library ID
 
-Easiest way is to open your Plex "Anime" section and look in the url for```sections=1``` or ```sections%2F1&``` both meaning section ID 1.
+Easiest way is to open your Plex Anime section(s) and look in the url for```sections=1``` or ```sections%2F1&``` both meaning section ID 1.
 
-Now we have everything we need to sync Plex with MyAnimeList, by default new entries get added as "Planned to Watch" as that is the only state MyAnimeList list that would fit it as it lacks something like collected:
+Now we have everything we need to sync Plex with MyAnimeList, by default new entries get added as "Planned to Watch" as that is the only state MyAnimeList list that would fit it as it lacks something like collected.
 
 ### Command line arguments
 
@@ -23,7 +23,6 @@ Now we have everything we need to sync Plex with MyAnimeList, by default new ent
 If you have multiple Plex section IDs can separate them with a comma like so:
 
 ```PlexMALSync.exe John Doe 127.0.0.1:32400 001000100FF 1,2,3,4```
-
 
 ### Requirements
 
