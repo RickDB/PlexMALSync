@@ -31,7 +31,7 @@ Now that configuration is finished and requirements have been installed we can f
 
 - Python PlexMALSync.py
 
-Depending on library size and server can take a few minutes to full sync, logging is verbose at the moment but will show the progress per show and when finished.
+Depending on library size and server can take a few minutes to finish, logging is verbose at the moment but will show the progress per show and when finished.
 
 ## Requirements
 
