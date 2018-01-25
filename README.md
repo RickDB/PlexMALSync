@@ -13,7 +13,7 @@ Currently planned for future releases:
 
 Previous version was written in C# (.NET) but due to library issues switched to Python where there are some great ones to work with, this is the first version and rough around the edges so bugs may occur.
 
-### Step 1 - configuration
+### Step 1 - Configuration
 
 Open PlexMALSync.py with your favorite editor and change the configuration section at the top (authentication / section), for Plex you need to select one authentication method (MyPlex OR Direct IP)
 
