@@ -1,0 +1,17 @@
+appdirs==1.4.3
+beautifulsoup4==4.6.0
+certifi==2018.1.18
+chardet==3.0.4
+decorating==0.5.2
+idna==2.6
+lxml==4.1.1
+mal==0.3.2
+pip==9.0.1
+PlexAPI==3.0.5
+requests==2.18.4
+setuptools==28.8.0
+six==1.11.0
+spice-api==1.0.4
+tqdm==4.19.5
+urllib3==1.22
+websocket-client==0.46.0
