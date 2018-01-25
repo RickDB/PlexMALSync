@@ -35,6 +35,12 @@ Depending on library size and server can take a few minutes to full sync, loggin
 
 [Python 3 (tested with 3.6.4)](https://www.python.org/)
 
+### Support
+
+Support thread is located on Plex Forums:
+
+https://forums.plex.tv/discussion/305261/plexmalsync-sync-your-plex-library-to-myanimelist
+
 ### Credits
 
 [Python-PlexAPI](https://github.com/pkkid/python-plexapi)
