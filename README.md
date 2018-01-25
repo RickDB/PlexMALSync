@@ -13,6 +13,8 @@ Currently planned for future releases:
 
 Previous version was written in C# (.NET) but due to library issues switched to Python where there are some great ones to work with, this is the first version and rough around the edges so bugs may occur.
 
+## Installation
+
 ### Step 1 - Configuration
 
 Open PlexMALSync.py with your favorite editor and change the configuration section at the top (authentication / section), for Plex you need to select one authentication method (MyPlex OR Direct IP)
@@ -31,20 +33,18 @@ Now that configuration is finished and requirements have been installed we can f
 
 Depending on library size and server can take a few minutes to full sync, logging is verbose at the moment but will show the progress per show and when finished.
 
-### Requirements
+## Requirements
 
 [Python 3 (tested with 3.6.4)](https://www.python.org/)
 
-### Support
+## Support
 
 Support thread is located on Plex Forums:
 
 https://forums.plex.tv/discussion/305261/plexmalsync-sync-your-plex-library-to-myanimelist
 
-### Credits
+## Credits
 
 [Python-PlexAPI](https://github.com/pkkid/python-plexapi)
 
 [Spice](https://github.com/Utagai/spice)
-
-
