@@ -1,4 +1,5 @@
 # Plex to MyAnimeList Sync
+![Logo](logo.png)
 
 If you manage your Anime with Plex this will allow you to sync your libraries to MyAnimeList.net, recommend using Plex with the [HAMA agent](https://github.com/ZeroQI/Hama.bundle) for best Anime name matches.
 
