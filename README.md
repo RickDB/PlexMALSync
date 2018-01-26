@@ -28,13 +28,13 @@ https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-ple
 
 Install  requirements from requirements.txt using this python command in the project folder:
 
-- pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 ### Step 3 - Start syncing
 
 Now that configuration is finished and requirements have been installed we can finally start the sync script:
 
-- Python PlexMALSync.py
+`Python PlexMALSync.py`
 
 Depending on library size and server can take a few minutes to finish, logging is verbose at the moment but will show the progress per show and when finished.
 
@@ -47,6 +47,21 @@ Depending on library size and server can take a few minutes to finish, logging i
 Support thread is located on Plex Forums:
 
 https://forums.plex.tv/discussion/305261/plexmalsync-sync-your-plex-library-to-myanimelist
+
+## Additional scripts
+
+In the scripts directory you will find additional scripts  for use in third party software.
+
+#### Scrobble.py
+Scrobble single show. 
+
+Parameters:
+
+`scrobble.py <mal_username> <mal_password> <show_title> <watched_episode#>`
+
+Example usage:
+
+`scrobble.py John Doe "Darling in the FranXX" 2`
 
 ## Credits
 
