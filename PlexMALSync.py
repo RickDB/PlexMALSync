@@ -146,7 +146,7 @@ def init():
   # get MAL list
   mal_list = get_mal_list()
 
-  # get anime show from Plex library
+  # get anime shows from Plex library
   shows = get_anime_shows()
 
   # get watched info for anime shows from Plex library
