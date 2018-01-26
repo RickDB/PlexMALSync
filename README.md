@@ -18,7 +18,10 @@ Previous version was written in C# (.NET) but due to library issues switched to 
 
 ### Step 1 - Configuration
 
-Open PlexMALSync.py with your favorite editor and change the configuration section at the top (authentication / section), for Plex you need to select one authentication method (MyPlex OR Direct IP)
+Open PlexMALSync.py with your favorite editor and change the configuration section at the top (authentication / section), for Plex you need to select one authentication method (MyPlex OR Direct IP).
+For the Direct IP authentication method you need to find your token manually:
+
+https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
 
 ### Step 2 - Install requirements
 
