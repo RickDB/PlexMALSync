@@ -148,7 +148,7 @@ def send_watched_to_mal(watched_shows, mal_list):
                 print('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watch_count))
                 anime_new = spice.get_blank(spice.get_medium('anime'))
                 anime_new.episodes = watch_count
-                anime_new.status = spice.get_status('watching')
+                anime_new.status = spice.get_status('completed')
                 spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
 
 
