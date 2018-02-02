@@ -105,21 +105,19 @@ def send_watched_to_mal(watched_shows, mal_list):
         show_is_listed = True
 
         if(mal_watch_count > 0 and mal_show_id > 0):
-          if(watch_count > mal_watch_count):
+          if(watch_count < mal_watch_count):
             print('[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, gonna update on MAL' % (show_title, watch_count, mal_watch_count))
             anime_new = spice.get_blank(spice.get_medium('anime'))
             anime_new.episodes = watch_count
+            spice.add(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
             spice.update(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
-          elif(watch_count == mal_watch_count):
-            print('[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, gonna update on MAL' % (show_title, watch_count, mal_watch_count))
+          else(watch_count >= mal_watch_count):
+            print('[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, gonna complete on MAL' % (show_title, watch_count, mal_watch_count))
             anime_new = spice.get_blank(spice.get_medium('anime'))
             anime_new.episodes = watch_count
             anime_new.status = spice.get_status('completed')
+            spice.add(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
             spice.update(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
-
-          else:
-            print('[PLEX -> MAL] Watch count for %s on Plex was equal on MAL so skipping update' % (show_title))
-            pass
 
     # if not listed in list lookup on MAL
     if(not show_is_listed):
@@ -138,18 +136,21 @@ def send_watched_to_mal(watched_shows, mal_list):
             pass
 
           if(mal_title == show_title.lower() or mal_title_english == show_title.lower()):
-            if(watch_count > mal_watch_count):
-                print('[PLEX -> MAL] Found match on MAL and setting state to completed with watch count: %s' % (watch_count))
+            mal_watch_count = int(mal_show.episodes)
+            if(watch_count < mal_watch_count):
+                print('[PLEX -> MAL] Found match on MAL %s and setting state to watching with watch count: %s' % (mal_watch_count, watch_count))
                 anime_new = spice.get_blank(spice.get_medium('anime'))
                 anime_new.episodes = watch_count
                 anime_new.status = spice.get_status('watching')
                 spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
-            elif(watch_count == mal_watch_count):
-                print('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watch_count))
+                spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+            elif(watch_count >= mal_watch_count):
+                print('[PLEX -> MAL] Found match on MAL and setting state to completed with watch count: %s' % (watch_count))
                 anime_new = spice.get_blank(spice.get_medium('anime'))
                 anime_new.episodes = watch_count
                 anime_new.status = spice.get_status('completed')
                 spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+                spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
 
 
             break
