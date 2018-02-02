@@ -138,7 +138,7 @@ def send_watched_to_mal(watched_shows, mal_list):
           if(mal_title == show_title.lower() or mal_title_english == show_title.lower()):
             mal_watch_count = int(mal_show.episodes)
             if(watch_count < mal_watch_count):
-                print('[PLEX -> MAL] Found match on MAL %s and setting state to watching with watch count: %s' % (mal_watch_count, watch_count))
+                print('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watch_count))
                 anime_new = spice.get_blank(spice.get_medium('anime'))
                 anime_new.episodes = watch_count
                 anime_new.status = spice.get_status('watching')
