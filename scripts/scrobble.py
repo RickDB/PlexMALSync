@@ -58,7 +58,7 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
           mal_watched_episode_count, mal_watched_episode_count, new_status))
           spice.update(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
         else:
-          print('[PLEX -> MAL] Watch count for %s on Plex was higher on MAL so skipping update' % (plex_title))
+          print('[PLEX -> MAL] Watch count for %s on Plex was equal or higher on MAL so skipping update' % (plex_title))
           pass
 
   # if not listed in list lookup on MAL
