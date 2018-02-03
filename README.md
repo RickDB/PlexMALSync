@@ -18,9 +18,7 @@ Previous version was written in C# (.NET) but due to library issues switched to 
 
 ### Step 1 - Configuration
 
-Open `PlexMALSync.py` with your favorite text editor, recommend using [NotePad++](https://notepad-plus-plus.org/) or [Visual Studio Code](https://code.visualstudio.com/) under Windows as to not mess up formatting.
-
-Change the configuration section at the top (authentication / section), for Plex you need to select one authentication method (MyPlex OR Direct IP).
+From the project directory copy the example settings file `settings.ini.example` to `settings.ini`, open `settings.ini` with your favorite editor and edit where needed.
 
 For the Direct IP authentication method you need to find your token manually:
 

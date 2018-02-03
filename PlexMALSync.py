@@ -1,40 +1,50 @@
+import configparser
+import os
+import sys
+import spice_api as spice
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
-from time import sleep
-import spice_api as spice
 
-#### Configuration ####
+## Settings
 
-### Authentication (Plex / MyAnimeList) ##
-## Plex (choose only one) ##
+settings_location = 'settings.ini'
+if(not os.path.isfile(settings_location)):
+  sys.exit('[CONFIG] Settings file file not found: %s' % (settings_location))
 
-# Option 1 - MyPlex (~15s login time)
-#plex_server = 'Sadala'
-#plex_user = 'John'
-#plex_password = 'Doe'
-#print('Attempting login')
-#account = MyPlexAccount(plex_user, plex_password)
-#plex = account.resource(plex_server).connect()
-#print('Login completed')
+settings = configparser.ConfigParser()
+settings.read(settings_location)
+plex_section = settings['PLEX']
+mal_section = settings['MAL']
 
-# Option 2 - Direct IP method (fastest)
-baseurl = 'http://127.0.0.1:32400'
-token = 'abcde12345'
-plex = PlexServer(baseurl, token)
+# Plex
+plex = None
+plex_authentication_method = plex_section['authentication_method']
 
-## MyAnimeList ##
-mal_username = 'John'
-mal_password = 'Doe'
+if(plex_authentication_method.lower() == 'direct'):
+  baseurl = plex_section['base_url']
+  token = plex_section['token']
+  plex = PlexServer(baseurl, token)
+elif(plex_authentication_method.lower() == 'myplex'):
+  plex_server = plex_section['server']
+  plex_user = plex_section['myplex_user']
+  plex_password = plex_section['myplex_password']
+  print('Attempting login')
+  account = MyPlexAccount(plex_user, plex_password)
+  plex = account.resource(plex_server).connect()
+  print('Login completed')
+
+if(plex == None):
+  sys.exit('[PLEX] Failed to authenticate due to invalid settings or authentication info, exiting...')
+
+plex_anime_section = plex_section['anime_section']
+
+# MyAnimeList
+mal_username = mal_section['username']
+mal_password = mal_section['password']
 mal_credentials = spice.init_auth(mal_username, mal_password)
 
-### Plex section - enter the library / section name used for Anime ###
-plex_anime_section = 'Anime'
-
-#### Configuration END ####
-
-####
-#### Do not edit anything below unless you know what you're doing ####
-####
+if(mal_credentials == None):
+  sys.exit('[MAL] Failed to authenticate, exiting...')
 
 def get_anime_shows():
   print('[PLEX] Retrieving anime shows...')
