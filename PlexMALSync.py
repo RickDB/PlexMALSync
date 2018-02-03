@@ -18,8 +18,8 @@ import spice_api as spice
 #print('Login completed')
 
 # Option 2 - Direct IP method (fastest)
-baseurl = 'http://10.1.2.3:32400'
-token = '1234abcde'
+baseurl = 'http://127.0.0.1:32400'
+token = 'abcde12345'
 plex = PlexServer(baseurl, token)
 
 ## MyAnimeList ##
@@ -63,7 +63,7 @@ def get_plex_watched_shows(lookup_shows):
         except:
           print('Error during lookup_result processing')
           pass
-    if(watched_episode_count > 0):  
+    if(watched_episode_count > 0):
         watched_shows[show] = watched_episode_count
         #print('Watched %s episodes for show: %s' % (str(watched_episode_count), show))
 
@@ -76,12 +76,12 @@ def get_mal_list():
   return mal_list
 
 def send_watched_to_mal(watched_shows, mal_list):
-  for key, value in watched_shows.items():      
+  for key, value in watched_shows.items():
     show_title = key
     watched_episode_count = value
     show_in_mal_list = False;
     #print('%s => watch count = %s' % (show_title, watched_episode_count))
-  
+
     if(watched_episode_count <= 0 ):
         continue
 
@@ -94,7 +94,7 @@ def send_watched_to_mal(watched_shows, mal_list):
       mal_id =int(list_item.id)
       mal_title = list_item.title
       mal_title_english = ""
-      
+
       if(list_item.english is not None):
         mal_title_english = list_item.english
         #print('Comparing original: %s | english: %s with %s' % (mal_title, mal_title_english, show_title))
@@ -109,19 +109,19 @@ def send_watched_to_mal(watched_shows, mal_list):
         show_in_mal_list = True
 
         if(mal_watched_episode_count > 0 and mal_show_id > 0):
-          if(watched_episode_count != mal_watched_episode_count):
+          if(watched_episode_count < mal_watched_episode_count):
             anime_new = spice.get_blank(spice.get_medium('anime'))
             anime_new.episodes = watched_episode_count
             new_status = 'watching'
 
             # if full watched set status to completed, needs additional lookup as total episodes are not exposed in list (mal or spice limitation)
             lookup_show = spice.search_id(mal_id, spice.get_medium('anime'), mal_credentials)
-            if(lookup_show):     
+            if(lookup_show):
               if(lookup_show.episodes is not None):
                 total_episodes = int(lookup_show.episodes)
 
                 if(watched_episode_count >= total_episodes):
-                  new_status = 'completed'         
+                  new_status = 'completed'
 
             anime_new.status =  spice.get_status(new_status)
 
@@ -163,13 +163,17 @@ def send_watched_to_mal(watched_shows, mal_list):
             if(mal_list_id == mal_show_id and watched_episode_count == mal_list_watched_episode_count):
               print('[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
               update_list = False
-          
+
           if(update_list):
             print('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watched_episode_count))
             anime_new = spice.get_blank(spice.get_medium('anime'))
             anime_new.episodes = watched_episode_count
-            anime_new.status = spice.get_status('watching')
-            spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+            if(watched_episode_count >= total_episodes):
+                anime_new.status = spice.get_status('completed')
+                spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+            else:
+                anime_new.status = spice.get_status('watching')
+                spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
           break
 
       if(not found_result):
