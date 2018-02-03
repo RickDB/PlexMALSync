@@ -146,6 +146,7 @@ def send_watched_to_mal(watched_shows, mal_list):
     if(not show_in_mal_list):
       found_result = False
       update_list = True
+      on_mal_list = False
       print('[PLEX -> MAL] %s not in MAL list, gonna search for show on MAL' % (plex_title))
 
       mal_shows = spice.search(plex_title,spice.get_medium('anime'),mal_credentials)
@@ -170,9 +171,12 @@ def send_watched_to_mal(watched_shows, mal_list):
             mal_list_id =int(list_item.id)
             mal_list_watched_episode_count = int(list_item.episodes)
 
-            if(mal_list_id == mal_show_id and watched_episode_count == mal_list_watched_episode_count):
-              print('[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
-              update_list = False
+            if(mal_list_id == mal_show_id):
+              on_mal_list = True;
+              if(watched_episode_count == mal_list_watched_episode_count):
+                print('[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
+                update_list = False
+              break
 
           if(update_list):
             print('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watched_episode_count))
@@ -181,10 +185,16 @@ def send_watched_to_mal(watched_shows, mal_list):
 
             if(watched_episode_count >= mal_total_episodes):
                 anime_new.status = spice.get_status('completed')
-                spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+                if(on_mal_list):
+                  spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+                else:
+                  spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
             else:
                 anime_new.status = spice.get_status('watching')
-                spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+                if(on_mal_list):
+                  spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
+                else:
+                  spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
           break
 
       if(not found_result):
