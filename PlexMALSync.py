@@ -1,19 +1,27 @@
 import configparser
+import coloredlogs
+import logging
 import os
 import sys
 import spice_api as spice
-from colorama import init, Fore, Back, Style
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 
-## Colorrama
-init()
+## Logger
+
+logger = logging.getLogger('PlexMALSync')
+
+## Enable this if you want to also log all messages coming from imported libraries
+#coloredlogs.install(level='DEBUG')
+
+coloredlogs.install(fmt='%(asctime)s,%(msecs)03d %(hostname)s %(name)s[%(process)d] %(message)s', logger=logger)  
 
 ## Settings
 
 settings_location = 'settings.ini'
 if(not os.path.isfile(settings_location)):
-  sys.exit('[CONFIG] Settings file file not found: %s' % (settings_location))
+  logger.critical('[CONFIG] Settings file file not found: %s' % (settings_location))
+  sys.exit()
 
 settings = configparser.ConfigParser()
 settings.read(settings_location)
@@ -32,13 +40,14 @@ elif(plex_authentication_method.lower() == 'myplex'):
   plex_server = plex_section['server']
   plex_user = plex_section['myplex_user']
   plex_password = plex_section['myplex_password']
-  print('Attempting login')
+  logger.info('Attempting login')
   account = MyPlexAccount(plex_user, plex_password)
   plex = account.resource(plex_server).connect()
-  print('Login completed')
+  logger.info('Login completed')
 
 if(plex == None):
-  sys.exit(Back.RED + '[PLEX] Failed to authenticate due to invalid settings or authentication info, exiting...')
+  logger.critical('[PLEX] Failed to authenticate due to invalid settings or authentication info, exiting...')
+  sys.exit()
 
 plex_anime_section = plex_section['anime_section']
 
@@ -48,10 +57,11 @@ mal_password = mal_section['password']
 mal_credentials = spice.init_auth(mal_username, mal_password)
 
 if(mal_credentials == None):
-  sys.exit(Back.RED + '[MAL] Failed to authenticate, exiting...')
+  logger.critical('[MAL] Failed to authenticate, exiting...')
+  sys.exit()
 
 def get_anime_shows():
-  print('[PLEX] Retrieving anime shows...')
+  logger.info('[PLEX] Retrieving anime shows...')
   anime_shows = []
   show_count = 0
   shows = plex.library.section(plex_anime_section)
@@ -59,12 +69,12 @@ def get_anime_shows():
     anime_shows.append(show.title)
     show_count += 1
 
-  print(Back.BLUE + '[PLEX] Retrieving of %s anime shows completed' % (show_count))
+  logger.info('[PLEX] Retrieving of %s anime shows completed' % (show_count))
   return anime_shows
 
 def get_plex_watched_shows(lookup_shows):
   watched_shows = dict()
-  print(Back.BLUE +'[PLEX] Retrieving watch count for shows...')
+  logger.info('[PLEX] Retrieving watch count for shows...')
 
   for show in lookup_shows:
     lookup_show = plex.library.section(plex_anime_section).get(show).episodes()
@@ -72,16 +82,16 @@ def get_plex_watched_shows(lookup_shows):
     for lookup_result in lookup_show:
         try:
           if(lookup_result.isWatched and lookup_result.seasonNumber is 1):
-            #print("%sx%s - watched = %s" % (lookup_result.seasonNumber, lookup_result.index, lookup_result.isWatched))
+            #logger.debug("%sx%s - watched = %s" % (lookup_result.seasonNumber, lookup_result.index, lookup_result.isWatched))
             watched_episode_count += 1
         except:
-          print(Back.RED +'Error during lookup_result processing')
+          logger.error(Back.RED +'Error during lookup_result processing')
           pass
     if(watched_episode_count > 0):
         watched_shows[show] = watched_episode_count
-        #print('Watched %s episodes for show: %s' % (str(watched_episode_count), show))
+        #logger.debug('Watched %s episodes for show: %s' % (str(watched_episode_count), show))
 
-  print(Back.BLUE +'[PLEX] Retrieving watch count for shows finished')
+  logger.info('[PLEX] Retrieving watch count for shows finished')
   return watched_shows
 
 def get_mal_list():
@@ -94,7 +104,7 @@ def send_watched_to_mal(watched_shows, mal_list):
     plex_title = key
     watched_episode_count = value
     show_in_mal_list = False;
-    #print('%s => watch count = %s' % (plex_title, watched_episode_count))
+    #logger.debug('%s => watch count = %s' % (plex_title, watched_episode_count))
 
     if(watched_episode_count <= 0 ):
         continue
@@ -104,20 +114,20 @@ def send_watched_to_mal(watched_shows, mal_list):
 
     # check if show is already on MAL list
     for list_item in mal_list:
-      #print('Comparing %s with %s' % (list_item.title, plex_title))
+      #logger.debug('Comparing %s with %s' % (list_item.title, plex_title))
       mal_id =int(list_item.id)
       mal_title = list_item.title
       mal_title_english = ""
 
       if(list_item.english is not None):
         mal_title_english = list_item.english
-        #print('Comparing original: %s | english: %s with %s' % (mal_title, mal_title_english, plex_title))
+        #logger.debug('Comparing original: %s | english: %s with %s' % (mal_title, mal_title_english, plex_title))
       else:
-        #print('Comparing original: %s with %s' % (mal_title, plex_title))
+        #logger.debug('Comparing original: %s with %s' % (mal_title, plex_title))
         pass
 
       if(mal_title.lower() == plex_title.lower() or mal_title_english.lower() == plex_title.lower()):
-        #print('%s [%s] was already in list => status = %s | watch count = %s' % (plex_title, list_item.id, spice.get_status(list_item.status), list_item.episodes))
+        #logger.debug('%s [%s] was already in list => status = %s | watch count = %s' % (plex_title, list_item.id, spice.get_status(list_item.status), list_item.episodes))
         mal_watched_episode_count = int(list_item.episodes)
         mal_show_id = int(list_item.id)
         show_in_mal_list = True
@@ -139,11 +149,11 @@ def send_watched_to_mal(watched_shows, mal_list):
 
             anime_new.status =  spice.get_status(new_status)
 
-            print(Back.MAGENTA +'[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, gonna update MAL watch count to %s and status to %s ]' % (plex_title, watched_episode_count,
+            logger.warn('[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, updating MAL watch count to %s and status to %s ]' % (plex_title, watched_episode_count,
             mal_watched_episode_count, watched_episode_count, new_status))
             spice.update(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
           else:
-            print(Back.GREEN + '[PLEX -> MAL] Watch count for %s on Plex was equal or higher on MAL so skipping update' % (plex_title))
+            logger.warning( '[PLEX -> MAL] Watch count for %s on Plex was equal or higher on MAL so skipping update' % (plex_title))
             pass
 
     # if not listed in list lookup on MAL
@@ -151,7 +161,7 @@ def send_watched_to_mal(watched_shows, mal_list):
       found_result = False
       update_list = True
       on_mal_list = False
-      print(Back.CYAN + '[PLEX -> MAL] %s not in MAL list, gonna search for show on MAL' % (plex_title))
+      logger.info('[PLEX -> MAL] %s not in MAL list, searching for show on MAL' % (plex_title))
 
       mal_shows = spice.search(plex_title,spice.get_medium('anime'),mal_credentials)
       for mal_show in mal_shows:
@@ -162,9 +172,9 @@ def send_watched_to_mal(watched_shows, mal_list):
 
         if(mal_show.english is not None):
           mal_title_english = mal_show.english.lower()
-          #print('Comparing original: %s | english: %s with %s' % (mal_title, mal_title_english, plex_title.lower()))
+          #logger.debug('Comparing original: %s | english: %s with %s' % (mal_title, mal_title_english, plex_title.lower()))
         else:
-          #print('Comparing original: %s with %s' % (mal_title, plex_title.lower()))
+          #logger.debug('Comparing original: %s with %s' % (mal_title, plex_title.lower()))
           pass
 
         if(mal_title == plex_title.lower() or mal_title_english == plex_title.lower()):
@@ -178,12 +188,12 @@ def send_watched_to_mal(watched_shows, mal_list):
             if(mal_list_id == mal_show_id):
               on_mal_list = True;
               if(watched_episode_count == mal_list_watched_episode_count):
-                print(Back.GREEN +'[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
+                logger.warning('[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
                 update_list = False
               break
 
           if(update_list):
-            print(Back.MAGENTA +'[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watched_episode_count))
+            logger.warn('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watched_episode_count))
             anime_new = spice.get_blank(spice.get_medium('anime'))
             anime_new.episodes = watched_episode_count
 
@@ -202,10 +212,10 @@ def send_watched_to_mal(watched_shows, mal_list):
           break
 
       if(not found_result):
-        print(Back.LIGHTRED_EX + '[PLEX -> MAL] Failed to find %s on MAL' % (plex_title))
+        logger.error('[PLEX -> MAL] Failed to find %s on MAL' % (plex_title))
 
 def start():
-  print(Back.BLUE + 'Started Plex to MAL sync...')
+  logger.info('Started Plex to MAL sync...')
 
   # get MAL list
   mal_list = get_mal_list()
@@ -219,7 +229,7 @@ def start():
   # finally compare lists and update MAL where needed
   send_watched_to_mal(watched_shows, mal_list)
 
-  print(Back.BLUE + 'Plex to MAL sync finished')
+  logger.info('Plex to MAL sync finished')
 
 # start main process
 start()
