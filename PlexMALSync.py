@@ -19,7 +19,7 @@ import spice_api as spice
 
 # Option 2 - Direct IP method (fastest)
 baseurl = 'http://127.0.0.1:32400'
-token = 'token'
+token = 'abcde12345'
 plex = PlexServer(baseurl, token)
 
 ## MyAnimeList ##
