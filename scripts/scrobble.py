@@ -9,7 +9,7 @@ logger = logging.getLogger('PlexMALSync')
 ## Enable this if you want to also log all messages coming from imported libraries
 #coloredlogs.install(level='DEBUG')
 
-coloredlogs.install(fmt='%(asctime)s,%(msecs)03d %(hostname)s %(name)s[%(process)d] %(message)s', logger=logger)  
+coloredlogs.install(fmt='%(asctime)s %(message)s', logger=logger)  
 
 mal_username = sys.argv[1]
 mal_password = sys.argv[2]
