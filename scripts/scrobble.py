@@ -1,5 +1,9 @@
 import sys
 import spice_api as spice
+from colorama import init, Fore, Back, Style
+
+## Colorrama
+init()
 
 mal_username = sys.argv[1]
 mal_password = sys.argv[2]
@@ -20,7 +24,7 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
   # check if show is already on MAL list
   for list_item in mal_list:
     #print('Comparing %s with %s' % (list_item.title, plex_title))
-    mal_id = int(list_item.id)
+    mal_id =int(list_item.id)
     mal_title = list_item.title
     mal_title_english = ""
 
@@ -32,13 +36,13 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
       pass
 
     if(mal_title.lower() == plex_title.lower() or mal_title_english.lower() == plex_title.lower()):
-      #print('%s [%s] was already in list => status = %s | watch count = %s' % (plex_title, list_item.id, spice.get_status(list_item.status), list_item.episodes))
+      #print('%s [%s] was already in list => status = %s | mal watch count = %s | plex watch count = %s' % (plex_title, list_item.id, spice.get_status(list_item.status), list_item.episodes, watched_episode_count))
       mal_watched_episode_count = int(list_item.episodes)
       mal_show_id = int(list_item.id)
       show_in_mal_list = True
          
       if(mal_watched_episode_count > 0 and mal_show_id > 0):
-        if(watched_episode_count < mal_watched_episode_count):
+        if(mal_watched_episode_count < watched_episode_count):
           anime_new = spice.get_blank(spice.get_medium('anime'))
           anime_new.episodes = watched_episode_count
           new_status = 'watching'
@@ -54,11 +58,11 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
 
           anime_new.status =  spice.get_status(new_status)
 
-          print('[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, gonna update MAL watch count to %s and status to %s ]' % (plex_title, watched_episode_count,
-          mal_watched_episode_count, mal_watched_episode_count, new_status))
+          print(Back.MAGENTA +'[PLEX -> MAL] Watch count for %s on Plex is %s and MAL is %s, gonna update MAL watch count to %s and status to %s ]' % (plex_title, watched_episode_count,
+          mal_watched_episode_count, watched_episode_count, new_status))
           spice.update(anime_new, mal_show_id, spice.get_medium('anime'), mal_credentials)
         else:
-          print('[PLEX -> MAL] Watch count for %s on Plex was equal or higher on MAL so skipping update' % (plex_title))
+          print(Back.GREEN + '[PLEX -> MAL] Watch count for %s on Plex was equal or higher on MAL so skipping update' % (plex_title))
           pass
 
   # if not listed in list lookup on MAL
@@ -66,7 +70,7 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
     found_result = False
     update_list = True
     on_mal_list = False
-    print('[PLEX -> MAL] %s not in MAL list, gonna search for show on MAL' % (plex_title))
+    print(Back.CYAN + '[PLEX -> MAL] %s not in MAL list, gonna search for show on MAL' % (plex_title))
 
     mal_shows = spice.search(plex_title,spice.get_medium('anime'),mal_credentials)
     for mal_show in mal_shows:
@@ -93,12 +97,12 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
           if(mal_list_id == mal_show_id):
             on_mal_list = True;
             if(watched_episode_count == mal_list_watched_episode_count):
-              print('[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
+              print(Back.GREEN +'[PLEX -> MAL] show was found in current MAL list using id lookup however watch count was identical so skipping update')
               update_list = False
             break
 
         if(update_list):
-          print('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watched_episode_count))
+          print(Back.MAGENTA +'[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (watched_episode_count))
           anime_new = spice.get_blank(spice.get_medium('anime'))
           anime_new.episodes = watched_episode_count
 
@@ -117,7 +121,7 @@ def send_watched_to_mal(mal_list, plex_title, watched_episode_count):
         break
 
     if(not found_result):
-      print('[PLEX -> MAL] Failed to find %s on MAL' % (plex_title))
+      print(Back.LIGHTRED_EX + '[PLEX -> MAL] Failed to find %s on MAL' % (plex_title))
 
 # get MAL list
 mal_list = get_mal_list()
