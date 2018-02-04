@@ -22,11 +22,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="PlexMALSync.py" />
+    <Compile Include="scripts\scrobble.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.md" />
     <Content Include="requirements.txt" />
     <Content Include="settings.ini.example" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="scripts\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
