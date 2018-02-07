@@ -114,17 +114,18 @@ def send_watched_to_mal(mal_list, plex_title, plex_watched_episode_count):
             break
 
         if(update_list):
-          logger.warn('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (plex_watched_episode_count))
           anime_new = spice.get_blank(spice.get_medium('anime'))
           anime_new.episodes = plex_watched_episode_count
 
           if(plex_watched_episode_count >= mal_total_episodes):
+              logger.warn('[PLEX -> MAL] Found match on MAL and setting state to completed as watch count equal or higher than total episodes')
               anime_new.status = spice.get_status('completed')
               if(on_mal_list):
                 spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
               else:
                 spice.add(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
           else:
+              logger.warn('[PLEX -> MAL] Found match on MAL and setting state to watching with watch count: %s' % (plex_watched_episode_count))
               anime_new.status = spice.get_status('watching')
               if(on_mal_list):
                 spice.update(anime_new, mal_show.id, spice.get_medium('anime'), mal_credentials)
