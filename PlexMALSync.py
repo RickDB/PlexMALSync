@@ -107,12 +107,55 @@ def get_mal_list():
   return mal_list
 
 
-#update_mal_list_with_seasons: instead of one match, let's return all seasons for watched shows and later compare by season.
-# these are seasons defined by MAL. 1 season MIGHT mean a continuous run of many AniDB/TVDB seasons, per MAL standards.
-def update_mal_list_with_seasons(mal_list,plex_watched_shows):
-  logger.info('[MAL] Retrieving updated list for season matching...')
+#compare entries by their name to see if they're different seasons from the same show, then populate the mal_list with additional entries to mark the season.
+#does not use splice.search, but is an N² search so very inefficient (since we don't know at first which is the original name)
+#TODO: clean garbage (repeated entries) from list. isn't a problem since we just need to match with the plex name and season.
+#for whatever reason, splice has problems populating list attributes so I needed to go back to raw_data
+def match_seasons_on_mal_list(mal_list):
+  logger.info('[MAL] Matching seasons inside MAL list...')
   mal_list_seasoned = list()
+
+  for watched_show in mal_list:
+    # type 1 indicates TV.
+    if (watched_show.raw_data.contents[3].contents[0] != '1'):
+      continue
+    matched_list = list()
+    mal_title = str(watched_show.raw_data.contents[1].contents[0]).lower()
+    for matching_watched_show in mal_list:
+      if (matching_watched_show.raw_data.contents[3].contents[0] == '1'):
+        #Later seasons have longer names, e.g. "original_name 2/Final/Second Stage/!!"
+        #Only the original season should have a list properly populated
+        if mal_title in str(matching_watched_show.raw_data.contents[1].contents[0]).lower():
+          match = (matching_watched_show,str(matching_watched_show.raw_data.contents[7].contents[0]) if str(matching_watched_show.raw_data.contents[7].contents[0]) != '0000-00-00' else '9999-99-99' )
+          matched_list.append(match)
+    matched_list.sort(key=lambda x: x[1])
+    
+    original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
+    #can't do miracles if it's all empty
+    if (not original_name):
+      original_name_treated = matched_list[0][0].title
+    else:
+      original_name_treated = original_name[0]
+    for index,element in enumerate(matched_list):
+      mal_list_seasoned.append((element[0],index+1,original_name_treated)) 
+  logger.info('[MAL] Matching seasons inside MAL list finished')
+  return mal_list_seasoned
+  
+
+  
+#update_mal_list_with_seasons: complete list with all seasons for watched shows and later compare by season.
+# these are seasons defined by MAL. 1 season MIGHT mean a continuous run of many AniDB/TVDB seasons, per MAL standards.
+# plex_watched_shows only uses the original name.
+def update_mal_list_with_seasons(mal_list_seasoned,plex_watched_shows):
+  logger.info('[MAL] Retrieving updated list for season matching...')
+  mal_list_seasoned_updated = list()
   for watched_show in plex_watched_shows.keys():
+    watched_show_season = plex_watched_shows[watched_show][1]
+    matches_in_mal_list_seasoned = list()
+    matches_in_mal_list_seasoned = [x for x in mal_list_seasoned if x[2].lower() == watched_show.lower() and x[1] == watched_show_season]
+    #only search for shows not already in list
+    if (bool(matches_in_mal_list_seasoned) or watched_show_season == 1):
+      continue
     mal_shows = spice.search(watched_show,spice.get_medium('anime'),mal_credentials) 
     matched_list = list()
     for mal_show in mal_shows:
@@ -128,9 +171,9 @@ def update_mal_list_with_seasons(mal_list,plex_watched_shows):
     else:
       original_name_treated = original_name[0]
     for index,element in enumerate(matched_list):
-      mal_list_seasoned.append((element[0],index+1,original_name_treated))
+      mal_list_seasoned_updated.append((element[0],index+1,original_name_treated))
   logger.info('[MAL] Retrieving updated list for season matching finished')
-  return mal_list_seasoned
+  return mal_list_seasoned_updated
 
 
 #update an existing match
@@ -280,9 +323,10 @@ def start():
   plex_watched_shows = get_plex_watched_shows(plex_shows)
 
   # finally compare lists and update MAL where needed
-  updated_mal_list = update_mal_list_with_seasons(mal_list,plex_watched_shows)
+  seasoned_list = match_seasons_on_mal_list(mal_list)
+  updated_mal_list = update_mal_list_with_seasons(seasoned_list,plex_watched_shows)
 
-  send_watched_to_mal(plex_watched_shows, mal_list, updated_mal_list)
+  send_watched_to_mal(plex_watched_shows, seasoned_list, updated_mal_list)
 
   logger.info('Plex to MAL sync finished')
 
