@@ -77,7 +77,7 @@ def get_plex_watched_shows(lookup_shows):
   logger.info('[PLEX] Retrieving watch count for shows...')
 
   for show in lookup_shows:
-    lookup_show = plex.library.section(plex_anime_section).get(show).episodes()[-1]
+    lookup_show = plex.library.section(plex_anime_section).get(show).episodes()
     # watched_episode_count = (episode count, season number)
     watched_episode_count = (0,1)
     for lookup_result in lookup_show:
@@ -86,13 +86,14 @@ def get_plex_watched_shows(lookup_shows):
           if (lookup_result.isWatched):
             #logger.debug("%sx%s - watched = %s" % (lookup_result.seasonNumber, lookup_result.index, lookup_result.isWatched))
             #watched_episode_count += 1
-            watched_episode_count = (lookup_show.index,lookup_result.seasonNumber)
+            if ((lookup_result.index > watched_episode_count[0] and lookup_result.seasonNumber == watched_episode_count[1]) or (lookup_result.seasonNumber > watched_episode_count[1])):
+              watched_episode_count = (lookup_result.index,lookup_result.seasonNumber)
         except:
           logger.error(Back.RED +'Error during lookup_result processing')
           pass
     if(watched_episode_count[0] > 0):
         watched_shows[show] = watched_episode_count
-        logger.info('Watched %s episodes for show: %s' % (str(watched_episode_count[0]), show))
+        logger.info('Watched %s episodes of show: %s' % (str(watched_episode_count[0]), show))
 
   logger.info('[PLEX] Retrieving watch count for shows finished')
   return watched_shows
@@ -148,7 +149,7 @@ def match_seasons_on_mal_list(mal_list):
 # plex_watched_shows only uses the original name.
 def update_mal_list_with_seasons(mal_list_seasoned,plex_watched_shows):
   logger.info('[MAL] Retrieving updated list for season matching...')
-  mal_list_seasoned_updated = list()
+  mal_list_seasoned_updated = [(x[0],x[1],x[2],'on_mal_list') for x in mal_list_seasoned]
   for watched_show in plex_watched_shows.keys():
     watched_show_season = plex_watched_shows[watched_show][1]
     matches_in_mal_list_seasoned = list()
@@ -171,18 +172,15 @@ def update_mal_list_with_seasons(mal_list_seasoned,plex_watched_shows):
     else:
       original_name_treated = original_name[0]
     for index,element in enumerate(matched_list):
-      mal_list_seasoned_updated.append((element[0],index+1,original_name_treated))
+      mal_list_seasoned_updated.append((element[0],index+1,original_name_treated,'not_on_mal_list'))
   logger.info('[MAL] Retrieving updated list for season matching finished')
   return mal_list_seasoned_updated
 
 
 #update an existing match
-def update_mal_entry(list_item,plex_title,plex_watched_episode_count,force_update):
-
-  
+def update_mal_entry(list_item,plex_title,plex_watched_episode_count,force_update):  
   mal_watched_episode_count = int(list_item.episodes)
   mal_show_id = int(list_item.id)
-  show_in_mal_list = True  
   if(mal_show_id > 0):
     if(mal_watched_episode_count < plex_watched_episode_count or force_update):
       anime_new = spice.get_blank(spice.get_medium('anime'))
@@ -207,6 +205,14 @@ def update_mal_entry(list_item,plex_title,plex_watched_episode_count,force_updat
       logger.warning( '[PLEX -> MAL] Watch count for %s on Plex was equal or higher on MAL so skipping update' % (plex_title))
       pass
 
+def add_mal_entry(list_item,on_mal_list):
+  if (on_mal_list == 'not_on_mal_list'):
+    logger.warn('[PLEX -> MAL] No MAL entry found for matching season of %s, adding to MAL with status Watching ]' % (list_item.title))
+
+    anime_new = spice.get_blank(spice.get_medium('anime'))
+    anime_new.episodes = 0
+    new_status = 'watching'
+    spice.add(anime_new, int(list_item.id), spice.get_medium('anime'), mal_credentials)
 
 
 def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
@@ -218,7 +224,7 @@ def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
     force_update = False
     #logger.debug('%s => watch count = %s' % (plex_title, watched_episode_count))
 
-    if(plex_watched_episode_count <= 0 ):
+    if(plex_watched_episode_count <= 0):
         continue
 
     mal_watched_episode_count = 0
@@ -227,18 +233,31 @@ def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
     # all shows with season > 1 were previously searched and are part of the mal_list_seasoned object
     if (plex_watched_episode_season > 1):
       force_update = True
-      for anime,season,original_name in mal_list_seasoned:
+      for anime,season,original_name,on_mal_list in mal_list_seasoned:
         if(original_name.lower() == plex_title.lower()):
+
+          try:
             correct_item = [value[0] for index, value in enumerate(mal_list_seasoned) if value[1] == plex_watched_episode_season and value[2] == original_name][0]
-            update_mal_entry(correct_item,plex_title,plex_watched_episode_count,force_update)
-            break
+          except:
+            #search failed to properly match seasons, e.g. Card Captor Sakura Clear Card is s4 on TVDB and s2 here
+            #assume most recent available season
+            #TODO: search by ID of the correct season
+            if force_update:
+              correct_item = spice.search_id(int(mal_list_seasoned[-1][0].id), spice.get_medium('anime'), mal_credentials)
+              on_mal_list = 'not_on_mal_list'
+            else:
+              break
+          #trying to add before doens't really break anything and works for new series, since mal_list_seasoned includes things you haven't watched yet
+          add_mal_entry(correct_item,on_mal_list)
+          update_mal_entry(correct_item,plex_title,plex_watched_episode_count,force_update)
+          break
       continue
 
 
     # check if show is already on MAL list
     for list_item in mal_list:
       #logger.debug('Comparing %s with %s' % (list_item.title, plex_title))
-      mal_id =int(list_item.id)
+      mal_id = int(list_item.id)
       mal_title = list_item.title
       mal_title_english = ""
       if(list_item.english is not None):
@@ -249,7 +268,8 @@ def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
         pass
 
       if(mal_title.lower() == plex_title.lower() or mal_title_english.lower() == plex_title.lower()):
-        #logger.debug('%s [%s] was already in list => status = %s | watch count = %s' % (plex_title, list_item.id, spice.get_status(list_item.status), list_item.episodes))
+        logger.debug('%s [%s] was already in list => status = %s | watch count = %s' % (plex_title, list_item.id, spice.get_status(list_item.status), list_item.episodes))
+        show_in_mal_list = True
         update_mal_entry(list_item,plex_title,plex_watched_episode_count,force_update)
 
     # if not listed in list lookup on MAL
@@ -322,11 +342,12 @@ def start():
   # get watched info for anime shows from Plex library
   plex_watched_shows = get_plex_watched_shows(plex_shows)
 
-  # finally compare lists and update MAL where needed
+  # add seasons to list
   seasoned_list = match_seasons_on_mal_list(mal_list)
   updated_mal_list = update_mal_list_with_seasons(seasoned_list,plex_watched_shows)
 
-  send_watched_to_mal(plex_watched_shows, seasoned_list, updated_mal_list)
+  # finally compare lists and update MAL where needed
+  send_watched_to_mal(plex_watched_shows, mal_list, updated_mal_list)
 
   logger.info('Plex to MAL sync finished')
 
