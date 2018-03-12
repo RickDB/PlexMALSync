@@ -139,10 +139,10 @@ def match_seasons_on_mal_list(mal_list):
           matched_list.append(match)
     matched_list.sort(key=lambda x: x[1])
     
-    original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
-    #can't do miracles if it's all empty
-
     try:
+      original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
+
+      #can't do miracles if it's all empty
       if (not original_name):
         original_name_treated = matched_list[0][0].title
       else:
@@ -186,11 +186,10 @@ def update_mal_list_with_seasons(mal_list_seasoned,plex_watched_shows):
       original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
 
       #can't do miracles if it's all empty
-      try: 
-        if (not original_name):
-          original_name_treated = matched_list[0][0].title
-        else:
-          original_name_treated = original_name[0]
+      if (not original_name):
+        original_name_treated = matched_list[0][0].title
+      else:
+        original_name_treated = original_name[0]
     except:
       logger.error('Error during original name treatment for show: %s' % (watched_show))
       original_name_treated = watched_show
