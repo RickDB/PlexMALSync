@@ -86,10 +86,11 @@ def get_plex_watched_shows(lookup_shows):
           if (lookup_result.isWatched):
             #logger.debug("%sx%s - watched = %s" % (lookup_result.seasonNumber, lookup_result.index, lookup_result.isWatched))
             #watched_episode_count += 1
-            if ((lookup_result.index > watched_episode_count[0] and lookup_result.seasonNumber == watched_episode_count[1]) or (lookup_result.seasonNumber > watched_episode_count[1])):
-              watched_episode_count = (lookup_result.index,lookup_result.seasonNumber)
+            if(lookup_result.index is not None and  lookup_result.seasonNumber is not None):
+              if ((lookup_result.index > watched_episode_count[0] and lookup_result.seasonNumber == watched_episode_count[1]) or (lookup_result.seasonNumber > watched_episode_count[1])):
+                watched_episode_count = (lookup_result.index,lookup_result.seasonNumber)
         except:
-          logger.error(Back.RED +'Error during lookup_result processing')
+          logger.error('Error during lookup_result processing')
           pass
     if(watched_episode_count[0] > 0):
         watched_shows[show] = watched_episode_count
