@@ -94,6 +94,8 @@ def get_plex_watched_shows(lookup_shows):
             if(lookup_result.index is not None):
               if ((lookup_result.index > watched_episode_count[0] and lookup_result.seasonNumber == watched_episode_count[1]) or (lookup_result.seasonNumber > watched_episode_count[1])):
                 watched_episode_count = (lookup_result.index,lookup_result.seasonNumber)
+            else:
+              watched_episode_count = 0
         except:
           logger.error('Error during lookup_result processing')
           pass
@@ -139,10 +141,16 @@ def match_seasons_on_mal_list(mal_list):
     
     original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
     #can't do miracles if it's all empty
-    if (not original_name):
-      original_name_treated = matched_list[0][0].title
-    else:
-      original_name_treated = original_name[0]
+
+    try:
+      if (not original_name):
+        original_name_treated = matched_list[0][0].title
+      else:
+        original_name_treated = original_name[0]
+    except:
+      logger.error('Error during matching season retrieval for show: %s' % (mal_title))
+      original_name_treated = mal_title
+
     for index,element in enumerate(matched_list):
       mal_list_seasoned.append((element[0],index+1,original_name_treated)) 
   logger.info('[MAL] Matching seasons inside MAL list finished')
@@ -166,17 +174,27 @@ def update_mal_list_with_seasons(mal_list_seasoned,plex_watched_shows):
     mal_shows = spice.search(watched_show,spice.get_medium('anime'),mal_credentials) 
     matched_list = list()
     for mal_show in mal_shows:
-      if (mal_show.anime_type == 'TV'):
-        match = (mal_show,mal_show.dates[1] if mal_show.dates[1] != '0000-00-00' else '9999-99-99' )
-        matched_list.append(match)
+      try:
+        if (mal_show.anime_type == 'TV'):
+          match = (mal_show,mal_show.dates[1] if mal_show.dates[1] != '0000-00-00' else '9999-99-99' )
+          matched_list.append(match)
+      except:
+        logger.error('Error during season date lookup for show: %s' % (mal_show))
     matched_list.sort(key=lambda x: x[1])
     
-    original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
-    #can't do miracles if it's all empty
-    if (not original_name):
-      original_name_treated = matched_list[0][0].title
-    else:
-      original_name_treated = original_name[0]
+    try:
+      original_name = [x[0].title for x in matched_list if x[1] != '9999-99-99']
+
+      #can't do miracles if it's all empty
+      try: 
+        if (not original_name):
+          original_name_treated = matched_list[0][0].title
+        else:
+          original_name_treated = original_name[0]
+    except:
+      logger.error('Error during original name treatment for show: %s' % (watched_show))
+      original_name_treated = watched_show
+
     for index,element in enumerate(matched_list):
       mal_list_seasoned_updated.append((element[0],index+1,original_name_treated,'not_on_mal_list'))
   logger.info('[MAL] Retrieving updated list for season matching finished')
