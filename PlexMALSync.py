@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import spice_api as spice
+from guessit import guessit
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 
@@ -258,7 +259,6 @@ def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
       force_update = True
       for anime,season,original_name,on_mal_list in mal_list_seasoned:
         if(original_name.lower() == plex_title.lower()):
-
           try:
             correct_item = [value[0] for index, value in enumerate(mal_list_seasoned) if value[1] == plex_watched_episode_season and value[2] == original_name][0]
           except:
@@ -302,7 +302,13 @@ def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
       on_mal_list = False
       logger.info('[PLEX -> MAL] %s not in MAL list, searching for show on MAL' % (plex_title))
 
-      mal_shows = spice.search(plex_title,spice.get_medium('anime'),mal_credentials)
+
+      potential_titles = [plex_title.lower(), guessit(plex_title)['title'].lower()]
+      for title in potential_titles:
+        mal_shows = spice.search(title, spice.get_medium('anime'), mal_credentials)
+        if len(mal_shows) >= 1:
+          break
+
       for mal_show in mal_shows:
         mal_title = mal_show.title.lower()
         mal_title_english = ''
@@ -316,7 +322,7 @@ def send_watched_to_mal(plex_watched_shows, mal_list, mal_list_seasoned):
           #logger.debug('Comparing original: %s with %s' % (mal_title, plex_title.lower()))
           pass
 
-        if(mal_title == plex_title.lower() or mal_title_english == plex_title.lower()):
+        if(mal_title in potential_titles or mal_title_english in potential_titles):
           found_result = True
 
           # double check against MAL list using id to see if matches and update is required
@@ -370,9 +376,11 @@ def start():
   updated_mal_list = update_mal_list_with_seasons(seasoned_list,plex_watched_shows)
 
   # finally compare lists and update MAL where needed
+
   send_watched_to_mal(plex_watched_shows, mal_list, updated_mal_list)
 
   logger.info('Plex to MAL sync finished')
 
 # start main process
-start()
+if __name__ == "__main__":
+  start()
