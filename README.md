@@ -26,15 +26,24 @@ https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-ple
 
 ### Step 2 - Install requirements
 
-Install  requirements from requirements.txt using this python command in the project folder:
+Install requirements from requirements.txt using this python command in the project folder:
 
-`pip install -r requirements.txt`
+`pipenv install`
+
+**Note:** This requires [pipenv](https://docs.pipenv.org/) to be installed.
 
 ### Step 3 - Start syncing
 
 Now that configuration is finished and requirements have been installed we can finally start the sync script:
 
-`Python PlexMALSync.py`
+`pipenv run python PlexMALSync.py`
+
+Or for development purposes activate the pipenv shell first:
+
+```shell
+pipenv shell
+python PlexMALSync.py
+```
 
 Depending on library size and server can take a few minutes to finish, logging is verbose at the moment but will show the progress per show and when finished.
 
