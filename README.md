@@ -9,8 +9,8 @@ Currently planned for future releases:
 
 - [x] CLI improvements (colors / status)
 - [ ] Improve error handling
-- [ ] Improve matching by using more MAL info, year comparision is an option but was hit and miss during testing before
-- [ ] Multiple season support, right now sync is limited to season 1 and not sure if feasible with the way MAL lists them 
+- [x] Improve matching by using more MAL info, year comparision is an option but was hit and miss during testing before
+- [x] Multiple season support, right now sync is limited to season 1 and not sure if feasible with the way MAL lists them 
 
 Previous version was written in C# (.NET) but due to library issues switched to Python where there are some great ones to work with, this is the first version and rough around the edges so bugs may occur.
 
