@@ -51,7 +51,7 @@ Depending on library size and server can take a few minutes to finish, logging i
 
 Besides the usual git clone / pull it it's recommended to update the requirements afterwards as well, you can do using this python command in the project folder:
 
-`pipenv updating`
+`pipenv update`
 
 ## Requirements
 
