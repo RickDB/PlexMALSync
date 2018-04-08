@@ -242,7 +242,7 @@ def update_mal_entry(
                 anime_new.status = spice.get_status(new_status)
 
             logger.warning(
-                '[PLEX -> MAL] Watch count for %s on Plex is {} and MAL is {}, updating MAL watch count to {} and status to {} ]' .format(
+                '[PLEX -> MAL] Watch count for {} on Plex is {} and MAL is {}, updating MAL watch count to {} and status to {}' .format(
                     plex_title,
                     plex_watched_episode_count,
                     mal_watched_episode_count,
