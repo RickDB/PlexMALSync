@@ -179,8 +179,7 @@ def update_mal_list_with_seasons(mal_list_seasoned, plex_shows):
                                         and x[1] == season]
         if bool(matches_in_mal_list_seasoned) or season == 1:
             continue
-        mal_shows = spice.search(
-            show, spice.get_medium('anime'), mal_credentials)
+        mal_shows = spice.search(show.title, spice.get_medium('anime'), mal_credentials)
         matched_list = []
         for mal_show in mal_shows:
             try:
