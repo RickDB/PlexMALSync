@@ -1,6 +1,11 @@
 # Plex to MyAnimeList Sync
 ![Logo](logo.png)
 
+
+# MAL has decided to disable their API due to recent GDPR rollout, this means the script is currently broken and will update when I know more.
+
+
+
 If you manage your Anime with Plex this will allow you to sync your libraries to MyAnimeList.net, recommend using Plex with the [HAMA agent](https://github.com/ZeroQI/Hama.bundle) for best Anime name matches.
 
 Unwatched Anime in Plex will not be synced so only those that have at least one watched episode, updates to MAL are only send with changes so need to worry about messing up watch history.
