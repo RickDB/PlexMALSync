@@ -7,7 +7,7 @@ coloredlogs==9.0
 guessit==2.1.4
 humanfriendly==4.8
 idna==2.6
-lxml==4.2.1
+lxml==4.6.2
 PlexAPI==3.0.5
 pyreadline==2.1
 python-dateutil==2.7.0
